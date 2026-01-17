@@ -52,7 +52,6 @@ public class InventoryChangeEvent {
             if (existing != null) {
                 store.removeComponent(player.getReference(), componentType);
             }
-            player.sendMessage(Message.raw("removing light"));
             return;
         }
         ColorLight light = new ColorLight(
@@ -62,7 +61,6 @@ public class InventoryChangeEvent {
             (byte) 10
         );
         if (existing == null) {
-            player.sendMessage(Message.raw("applying light"));
             store.addComponent(
                 player.getReference(),
                 componentType,
