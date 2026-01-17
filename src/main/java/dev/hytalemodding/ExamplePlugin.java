@@ -1,11 +1,12 @@
 package dev.hytalemodding;
 
+import com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import dev.hytalemodding.commands.ExampleCommand;
 import dev.hytalemodding.events.ExampleEvent;
-
+import dev.hytalemodding.events.InventoryChangeEvent;
 import javax.annotation.Nonnull;
 
 public class ExamplePlugin extends JavaPlugin {
@@ -16,7 +17,16 @@ public class ExamplePlugin extends JavaPlugin {
 
     @Override
     protected void setup() {
-        this.getCommandRegistry().registerCommand(new ExampleCommand("example", "An example command"));
-        this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, ExampleEvent::onPlayerReady);
+        this.getCommandRegistry().registerCommand(
+            new ExampleCommand("example", "An example command")
+        );
+        this.getEventRegistry().registerGlobal(
+            PlayerReadyEvent.class,
+            ExampleEvent::onPlayerReady
+        );
+        this.getEventRegistry().registerGlobal(
+            LivingEntityInventoryChangeEvent.class,
+            InventoryChangeEvent::onInventoryChange
+        );
     }
 }
