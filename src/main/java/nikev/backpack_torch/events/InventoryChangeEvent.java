@@ -1,4 +1,4 @@
-package dev.hytalemodding.events;
+package nikev.backpack_torch.events;
 
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Store;

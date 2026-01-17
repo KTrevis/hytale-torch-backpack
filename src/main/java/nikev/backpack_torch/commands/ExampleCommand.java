@@ -1,12 +1,11 @@
-package dev.hytalemodding.commands;
+package nikev.backpack_torch.commands;
 
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-
+import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.concurrent.CompletableFuture;
 
 public class ExampleCommand extends AbstractCommand {
 
@@ -17,8 +16,9 @@ public class ExampleCommand extends AbstractCommand {
     @Nullable
     @Override
     protected CompletableFuture<Void> execute(@Nonnull CommandContext context) {
-        context.sendMessage(Message.raw("Hello from ExampleCommand!"));
+        context.sendMessage(
+            Message.raw("Backpack torch succesfully installed !")
+        );
         return CompletableFuture.completedFuture(null);
     }
-
 }
