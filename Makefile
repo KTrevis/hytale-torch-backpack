@@ -4,4 +4,4 @@ build:
 	mvn package
 
 deploy:
-	cp ./target/BackpackTorch-1.0-SNAPSHOT.jar ../mods
+	cp ./target/BackpackTorch-1.0-SNAPSHOT.jar ../server-files/mods
