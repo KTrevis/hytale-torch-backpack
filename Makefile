@@ -4,4 +4,4 @@ build:
 	mvn package
 
 deploy:
-	cp ./target/BackpackTorch-1.0-SNAPSHOT.jar ../mods
+	cp ./target/UpgradableChest-1.0-SNAPSHOT.jar ../mods
