@@ -1,27 +1,38 @@
 package nikev.upgradable_chest.events;
 
-import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.server.core.Message;
-import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
-import com.hypixel.hytale.server.core.entity.InteractionContext;
-import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.component.Archetype;
+import com.hypixel.hytale.component.ArchetypeChunk;
+import com.hypixel.hytale.component.CommandBuffer;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.component.query.Query;
+import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.server.core.event.events.ecs.UseBlockEvent;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-public class BlockUsedEvent {
+public class BlockUsedEvent
+    extends EntityEventSystem<EntityStore, UseBlockEvent.Pre>
+{
 
-    public static void onBlockUsed(UseBlockEvent event) {
-        System.err.println("hello");
-        InteractionContext context = event.getContext();
-        Ref<EntityStore> ref = context.getEntity();
-        BlockType blockType = event.getBlockType();
+    public BlockUsedEvent() {
+        super(UseBlockEvent.Pre.class);
+    }
 
-        if (ref == null || !ref.isValid()) {
-            return;
-        }
-        Player player = context
-            .getCommandBuffer()
-            .getComponent(ref, Player.getComponentType());
-        player.sendMessage(Message.raw(blockType.getStateForBlock(blockType)));
+    @Override
+    public void handle(
+        int index,
+        @Nonnull ArchetypeChunk<EntityStore> archetypeChunk,
+        @Nonnull Store<EntityStore> store,
+        @Nonnull CommandBuffer<EntityStore> commandBuffer,
+        @Nonnull UseBlockEvent.Pre event
+    ) {
+        System.out.println("hello");
+    }
+
+    @Nullable
+    @Override
+    public Query<EntityStore> getQuery() {
+        return Archetype.empty();
     }
 }
