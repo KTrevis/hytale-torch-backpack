@@ -11,14 +11,12 @@ import com.hypixel.hytale.event.EventPriority;
 import com.hypixel.hytale.event.EventRegistration;
 import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Vector3i;
-import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.entity.entities.player.pages.Page;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.ContainerBlockWindow;
-import com.hypixel.hytale.server.core.entity.entities.player.windows.ItemContainerWindow;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.Window;
 import com.hypixel.hytale.server.core.entity.entities.player.windows.WindowManager;
 import com.hypixel.hytale.server.core.event.events.ecs.UseBlockEvent;
@@ -79,7 +77,7 @@ public class BlockUsedEvent
             return;
         }
 
-        registerUpgradeListener(itemContainerState, player);
+        registerUpgradeListener(itemContainerState, player, ref, store);
     }
 
     public void shutdown() {
@@ -95,18 +93,22 @@ public class BlockUsedEvent
     private void onContainerChange(
         ItemContainerChangeEvent event,
         ItemContainerState itemContainerState,
-        Player player
+        Player player,
+        Ref<EntityStore> ref,
+        Store<EntityStore> store
     ) {
         if (!event.transaction().succeeded()) {
             return;
         }
         short upgradeItemCount = getUpgradeItemCount(itemContainerState);
-        applyUpgrade(itemContainerState, upgradeItemCount, player);
+        applyUpgrade(itemContainerState, upgradeItemCount, player, ref, store);
     }
 
     private void registerUpgradeListener(
         ItemContainerState itemContainerState,
-        Player player
+        Player player,
+        Ref<EntityStore> ref,
+        Store<EntityStore> store
     ) {
         EventRegistration<?, ?> existing = this.containerRegistrations.get(
             itemContainerState
@@ -118,7 +120,7 @@ public class BlockUsedEvent
         EventRegistration<?, ?> registration = itemContainerState
             .getItemContainer()
             .registerChangeEvent(EventPriority.LAST, event ->
-                onContainerChange(event, itemContainerState, player)
+                onContainerChange(event, itemContainerState, player, ref, store)
             );
         this.containerRegistrations.put(itemContainerState, registration);
     }
@@ -143,7 +145,9 @@ public class BlockUsedEvent
 
     private void openContainerWindow(
         ItemContainerState itemContainerState,
-        Player player
+        Player player,
+        Ref<EntityStore> ref,
+        Store<EntityStore> store
     ) {
         Vector3i pos = itemContainerState.getBlockPosition();
         World world = player.getWorld();
@@ -184,7 +188,9 @@ public class BlockUsedEvent
 
     private void refreshContainerWindow(
         ItemContainerState itemContainerState,
-        Player player
+        Player player,
+        Ref<EntityStore> ref,
+        Store<EntityStore> store
     ) {
         WindowManager windowManager = player.getWindowManager();
 
@@ -192,19 +198,22 @@ public class BlockUsedEvent
             windowManager.closeWindow(window.getId());
         }
         itemContainerState.getWindows().clear();
-        openContainerWindow(itemContainerState, player);
+        openContainerWindow(itemContainerState, player, ref, store);
     }
 
-    private boolean applyUpgrade(
+    private void applyUpgrade(
         ItemContainerState itemContainerState,
         short upgradeItemCount,
-        Player player
+        Player player,
+        Ref<EntityStore> ref,
+        Store<EntityStore> store
     ) {
         SimpleItemContainer container =
             (SimpleItemContainer) itemContainerState.getItemContainer();
         short upgradedCapacity = (short) (upgradeItemCount * 9);
-        if (container.getCapacity() >= upgradedCapacity) {
-            return false;
+        boolean isDoubleChest = container.getCapacity() == 9 * 4;
+        if (container.getCapacity() >= upgradedCapacity || !isDoubleChest) {
+            return;
         }
         List<ItemStack> remainder = new ObjectArrayList<>();
         SimpleItemContainer resized = ItemContainer.ensureContainerCapacity(
@@ -216,10 +225,9 @@ public class BlockUsedEvent
         itemContainerState.setItemContainer(resized);
         itemContainerState.setCustom(true);
         resized.registerChangeEvent(EventPriority.LAST, event ->
-            onContainerChange(event, itemContainerState, player)
+            onContainerChange(event, itemContainerState, player, ref, store)
         );
-        refreshContainerWindow(itemContainerState, player);
-        return true;
+        refreshContainerWindow(itemContainerState, player, ref, store);
     }
 
     @Nullable
