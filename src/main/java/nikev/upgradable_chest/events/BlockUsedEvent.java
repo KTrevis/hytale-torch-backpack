@@ -150,7 +150,15 @@ public class BlockUsedEvent
         WorldChunk chunk = world.getChunk(
             ChunkUtil.indexChunkFromBlock(pos.x, pos.z)
         );
-        BlockType blockType = itemContainerState.getBlockType();
+        BlockType blockType = world.getBlockType(pos);
+        UUIDComponent uuidComponent = store.getComponent(
+            ref,
+            UUIDComponent.getComponentType()
+        );
+        if (uuidComponent == null) {
+            return;
+        }
+        UUID uuid = uuidComponent.getUuid();
         ContainerBlockWindow window = new ContainerBlockWindow(
             pos.x,
             pos.y,
@@ -159,6 +167,19 @@ public class BlockUsedEvent
             blockType,
             itemContainerState.getItemContainer()
         );
+        Map<UUID, ContainerBlockWindow> windows =
+            itemContainerState.getWindows();
+        if (windows.putIfAbsent(uuid, window) == null) {
+            if (
+                !player
+                    .getPageManager()
+                    .setPageWithWindows(ref, store, Page.Bench, true, window)
+            ) {
+                windows.remove(uuid, window);
+                return;
+            }
+            window.registerCloseEvent(event -> windows.remove(uuid, window));
+        }
     }
 
     private void refreshContainerWindow(
@@ -170,6 +191,8 @@ public class BlockUsedEvent
         for (Window window : itemContainerState.getWindows().values()) {
             windowManager.closeWindow(window.getId());
         }
+        itemContainerState.getWindows().clear();
+        openContainerWindow(itemContainerState, player);
     }
 
     private boolean applyUpgrade(
